@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f3e9">
+  <meta name="description" content="BAYBAYIN AI helps your words find their way into another language.">
+  <title>BAYBAYIN AI — Language Studio</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap');
+
+    :root {
+      color-scheme: light;
+      --paper: #f5f3e9;
+      --ink: #20291f;
+      --muted: #76796c;
+      --rule: #d8d8c9;
+      --green: #c9ed4b;
+      --green-dark: #4d641f;
+      --coral: #ee7457;
+      --white: #fffef9;
+      --mono: 'DM Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+      --serif: 'Playfair Display', Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(#37432c12 .7px, transparent .7px);
+      background-size: 7px 7px;
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, select, textarea { font: inherit; }
+    button { color: inherit; }
+
+    .page-shell { min-height: 100vh; overflow: hidden; }
+
+    .topbar {
+      min-height: 76px;
+      padding: 0 6.4%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--rule);
+      background: #f5f3e9e8;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      background: var(--green);
+      border: 1px solid var(--ink);
+      border-radius: 50%;
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .brand-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+    }
+
+    .topbar-note, .eyebrow, .field-label, .character-count, .footer-note {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .7px;
+      text-transform: uppercase;
+    }
+
+    .topbar-note { display: flex; align-items: center; gap: 9px; color: var(--muted); }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #829a43; }
+
+    main {
+      width: min(1120px, 87.2%);
+      margin: 0 auto;
+      padding: clamp(48px, 8vh, 84px) 0 46px;
+    }
+
+    .intro {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 32px;
+      margin-bottom: 39px;
+      animation: arrive .55s ease-out both;
+    }
+
+    .eyebrow { margin: 0 0 15px; color: var(--green-dark); }
+
+    h1 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(43px, 6.2vw, 76px);
+      font-weight: 600;
+      line-height: 1.04;
+    }
+
+    h1 em { color: var(--green-dark); font-weight: 600; }
+
+    .intro-aside {
+      width: 218px;
+      margin: 0 0 7px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .translator {
+      position: relative;
+      background: var(--white);
+      border: 1px solid var(--ink);
+      box-shadow: 5px 5px 0 var(--ink);
+      animation: arrive .65s .08s ease-out both;
+    }
+
+    .language-bar {
+      min-height: 70px;
+      display: grid;
+      grid-template-columns: 1fr 58px 1fr;
+      align-items: center;
+      padding: 0 23px;
+      background: #efeee3;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .language-picker { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .language-picker:last-child { justify-content: flex-end; }
+
+    .language-picker select {
+      max-width: 100%;
+      padding: 8px 26px 8px 0;
+      color: var(--ink);
+      background: transparent;
+      border: 0;
+      outline-offset: 3px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .field-label { flex: 0 0 auto; color: var(--muted); font-size: 9px; }
+
+    .swap-button {
+      width: 34px;
+      height: 34px;
+      justify-self: center;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--rule);
+      border-radius: 50%;
+      background: var(--white);
+      cursor: pointer;
+      transition: background .18s, transform .18s;
+    }
+
+    .swap-button:hover { background: var(--green); transform: rotate(180deg); }
+
+    .writing-area { display: grid; grid-template-columns: 1fr 1fr; min-height: 257px; }
+
+    .writing-pane { position: relative; min-width: 0; padding: 22px 24px 17px; }
+    .writing-pane + .writing-pane { border-left: 1px solid var(--rule); background: #fffef8; }
+
+    textarea {
+      width: 100%;
+      min-height: 168px;
+      padding: 15px 0 12px;
+      resize: vertical;
+      color: var(--ink);
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font-family: var(--serif);
+      font-size: 20px;
+      line-height: 1.65;
+    }
+
+    textarea::placeholder { color: #a1a294; }
+    #outputText { color: #405236; }
+
+    .pane-footer { min-height: 29px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+    .character-count { color: var(--muted); font-size: 9px; }
+    .quiet-actions { display: flex; align-items: center; gap: 5px; }
+
+    .icon-button {
+      min-width: 31px;
+      min-height: 31px;
+      padding: 5px 8px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid transparent;
+      border-radius: 3px;
+      background: transparent;
+      color: #53594c;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .icon-button:hover:not(:disabled) { border-color: var(--rule); background: #f1f0e7; }
+    .icon-button:disabled { opacity: .4; cursor: default; }
+
+    .action-bar {
+      min-height: 73px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      border-top: 1px solid var(--rule);
+      background: #fbfaf4;
+    }
+
+    .engine-note { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 11px; }
+
+    .translate-button {
+      min-height: 45px;
+      min-width: 166px;
+      padding: 0 19px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      border: 1px solid var(--ink);
+      background: var(--green);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .16s, transform .16s;
+    }
+
+    .translate-button:hover:not(:disabled) { background: #d8f778; transform: translateY(-1px); }
+    .translate-button:disabled { cursor: wait; opacity: .75; }
+
+    .translate-button .arrow { font-size: 17px; }
+
+    .message {
+      min-height: 23px;
+      margin: 15px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .message.error { color: #a63e30; }
+
+    .bottom-line {
+      margin-top: 35px;
+      padding-top: 17px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      border-top: 1px solid var(--rule);
+    }
+
+    .footer-note { color: var(--muted); font-size: 9px; }
+    .footer-word { color: var(--green-dark); font-family: var(--serif); font-size: 16px; font-style: italic; }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      padding: 12px 16px;
+      color: var(--white);
+      background: var(--ink);
+      font-size: 12px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .18s, transform .18s;
+      pointer-events: none;
+    }
+
+    .toast.visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 680px) {
+      .topbar { min-height: 64px; padding: 0 6%; }
+      .topbar-note { font-size: 9px; }
+      main { width: 88%; padding-top: 49px; }
+      .intro { display: block; margin-bottom: 30px; }
+      h1 { font-size: clamp(44px, 11vw, 64px); }
+      .intro-aside { width: auto; max-width: 310px; margin-top: 16px; }
+      .language-bar { min-height: 65px; grid-template-columns: 1fr 42px 1fr; padding: 0 13px; }
+      .language-picker { gap: 6px; }
+      .field-label { font-size: 8px; }
+      .language-picker select { font-size: 12px; }
+      .writing-area { grid-template-columns: 1fr; }
+      .writing-pane { min-height: 217px; padding: 18px 19px 13px; }
+      .writing-pane + .writing-pane { border-top: 1px solid var(--rule); border-left: 0; }
+      textarea { min-height: 127px; font-size: 19px; }
+      .action-bar { padding: 11px 13px; }
+      .engine-note { max-width: 145px; font-size: 10px; line-height: 1.45; }
+      .translate-button { min-width: 147px; padding: 0 13px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="BAYBAYIN AI">
+        <span class="brand-mark" aria-hidden="true">B</span>
+        <span class="brand-name">BAYBAYIN AI</span>
+      </div>
+      <div class="topbar-note"><span class="status-dot" aria-hidden="true"></span> ON-DEVICE INFERENCE <span aria-hidden="true">/</span> QVAC</div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">A little closer, in every language</p>
+          <h1 id="page-title">Words travel.<br><em>Meaning stays.</em></h1>
+        </div>
+        <p class="intro-aside">Find the words for it, wherever in the world they need to go.</p>
+      </section>
+
+      <section class="translator" aria-label="Translator">
+        <div class="language-bar">
+          <label class="language-picker">
+            <span class="field-label">FROM</span>
+            <select id="sourceLanguage" aria-label="Translate from"></select>
+          </label>
+          <button id="swapButton" class="swap-button" type="button" title="Swap languages" aria-label="Swap languages">↔</button>
+          <label class="language-picker">
+            <span class="field-label">TO</span>
+            <select id="targetLanguage" aria-label="Translate to"></select>
+          </label>
+        </div>
+
+        <div class="writing-area">
+          <div class="writing-pane">
+            <textarea id="sourceText" maxlength="500" placeholder="Write something worth sharing..." aria-label="Text to translate"></textarea>
+            <div class="pane-footer">
+              <span id="characterCount" class="character-count">0 / 500</span>
+              <div class="quiet-actions">
+                <button id="clearButton" class="icon-button" type="button" title="Clear text" aria-label="Clear text">×</button>
+              </div>
+            </div>
+          </div>
+          <div class="writing-pane">
+            <textarea id="outputText" placeholder="Your translation will find its way here..." aria-label="Translated text" readonly></textarea>
+            <div class="pane-footer">
+              <span id="detectedLanguage" class="character-count">READY WHEN YOU ARE</span>
+              <div class="quiet-actions">
+                <button id="listenButton" class="icon-button" type="button" title="Listen to translation" aria-label="Listen to translation" disabled>♫</button>
+                <button id="copyButton" class="icon-button" type="button" title="Copy translation" aria-label="Copy translation" disabled>▢</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-bar">
+          <span class="engine-note"><span aria-hidden="true">✳</span> QVAC on-device. Models download on first use.</span>
+          <button id="translateButton" class="translate-button" type="button" disabled>
+            <span id="buttonText">Translate</span><span class="arrow" aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </section>
+      <p id="message" class="message" role="status" aria-live="polite"></p>
+
+      <footer class="bottom-line">
+        <span class="footer-note">A bridge between here and there</span>
+        <span class="footer-word">Salita, everywhere.</span>
+      </footer>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const sourceLanguage = document.querySelector('#sourceLanguage');
+    const targetLanguage = document.querySelector('#targetLanguage');
+    const sourceText = document.querySelector('#sourceText');
+    const outputText = document.querySelector('#outputText');
+    const translateButton = document.querySelector('#translateButton');
+    const message = document.querySelector('#message');
+    const detectedLanguage = document.querySelector('#detectedLanguage');
+    const copyButton = document.querySelector('#copyButton');
+    const listenButton = document.querySelector('#listenButton');
+    const toast = document.querySelector('#toast');
+    const languageNames = new Map();
+    const availablePairs = new Set();
+    let latestToast;
+
+    function addOption(select, language) {
+      const option = document.createElement('option');
+      option.value = language.code;
+      option.textContent = language.name;
+      select.append(option);
+    }
+
+    function clearTranslation() {
+      outputText.value = '';
+      copyButton.disabled = true;
+      listenButton.disabled = true;
+      detectedLanguage.textContent = 'ON-DEVICE QVAC READY';
+      message.textContent = '';
+      message.classList.remove('error');
+    }
+
+    function populateTargets(preferredCode) {
+      const sourceCode = sourceLanguage.value;
+      const availableTargets = [...availablePairs]
+        .filter(pair => pair.startsWith(`${sourceCode}|`))
+        .map(pair => pair.split('|')[1]);
+      targetLanguage.replaceChildren();
+      for (const code of availableTargets) addOption(targetLanguage, languageNames.get(code));
+      targetLanguage.value = availableTargets.includes(preferredCode) ? preferredCode : availableTargets[0];
+    }
+
+    async function initializeLanguages() {
+      try {
+        const response = await fetch('/api/languages');
+        if (!response.ok) throw new Error('Could not read the local QVAC model catalog.');
+        const catalog = await response.json();
+        for (const language of catalog.languages) languageNames.set(language.code, language);
+        for (const pair of catalog.pairs) availablePairs.add(`${pair.from}|${pair.to}`);
+        for (const language of catalog.sourceLanguages) addOption(sourceLanguage, language);
+        sourceLanguage.value = languageNames.has('en') && catalog.sourceLanguages.some(language => language.code === 'en')
+          ? 'en'
+          : catalog.sourceLanguages[0]?.code;
+        populateTargets('es');
+        translateButton.disabled = !sourceLanguage.value || !targetLanguage.value;
+        detectedLanguage.textContent = 'ON-DEVICE QVAC READY';
+      } catch (error) {
+        message.textContent = error.message;
+        message.classList.add('error');
+        detectedLanguage.textContent = 'LOCAL MODEL CATALOG UNAVAILABLE';
+      }
+    }
+
+    sourceLanguage.addEventListener('change', () => {
+      populateTargets('');
+      clearTranslation();
+    });
+
+    targetLanguage.addEventListener('change', clearTranslation);
+
+    function showToast(text) {
+      toast.textContent = text;
+      toast.classList.add('visible');
+      clearTimeout(latestToast);
+      latestToast = setTimeout(() => toast.classList.remove('visible'), 1900);
+    }
+
+    sourceText.addEventListener('input', () => {
+      document.querySelector('#characterCount').textContent = `${sourceText.value.length} / 500`;
+      if (outputText.value) {
+        clearTranslation();
+      }
+      message.textContent = '';
+      message.classList.remove('error');
+    });
+
+    document.querySelector('#clearButton').addEventListener('click', () => {
+      sourceText.value = '';
+      document.querySelector('#characterCount').textContent = '0 / 500';
+      clearTranslation();
+      sourceText.focus();
+    });
+
+    document.querySelector('#swapButton').addEventListener('click', () => {
+      const nextSource = targetLanguage.value;
+      const nextTarget = sourceLanguage.value;
+      if (!availablePairs.has(`${nextSource}|${nextTarget}`)) {
+        showToast('No offline model is available for that reverse direction.');
+        return;
+      }
+      const translatedText = outputText.value;
+      sourceLanguage.value = nextSource;
+      populateTargets(nextTarget);
+      if (translatedText) {
+        sourceText.value = translatedText;
+        document.querySelector('#characterCount').textContent = `${sourceText.value.length} / 500`;
+      }
+      clearTranslation();
+    });
+
+    translateButton.addEventListener('click', async () => {
+      const text = sourceText.value.trim();
+      if (!text) {
+        message.textContent = 'Add a few words first, and they’ll be on their way.';
+        message.classList.remove('error');
+        sourceText.focus();
+        return;
+      }
+
+      translateButton.disabled = true;
+      document.querySelector('#buttonText').textContent = 'Loading local model...';
+      message.textContent = 'The model may download on first use. Translation runs on this device.';
+      message.classList.remove('error');
+      outputText.value = '';
+      copyButton.disabled = true;
+      listenButton.disabled = true;
+      detectedLanguage.textContent = 'RUNNING ON DEVICE';
+
+      try {
+        const response = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            text,
+            from: sourceLanguage.value,
+            to: targetLanguage.value
+          })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Local translation failed.');
+        outputText.value = result.translation;
+        detectedLanguage.textContent = 'ON-DEVICE TRANSLATION READY';
+        message.textContent = '';
+        copyButton.disabled = false;
+        listenButton.disabled = false;
+      } catch (error) {
+        detectedLanguage.textContent = 'LOCAL TRANSLATION FAILED';
+        message.textContent = error instanceof TypeError
+          ? 'Could not reach the local QVAC server. Start the app with npm start.'
+          : error.message;
+        message.classList.add('error');
+      } finally {
+        translateButton.disabled = false;
+        document.querySelector('#buttonText').textContent = 'Translate';
+      }
+    });
+
+    copyButton.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(outputText.value);
+        showToast('Translation copied.');
+      } catch {
+        outputText.focus();
+        outputText.select();
+        showToast('Select the translation to copy it.');
+      }
+    });
+
+    listenButton.addEventListener('click', () => {
+      if (!('speechSynthesis' in window)) {
+        showToast('Speech is not available in this browser.');
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(outputText.value);
+      utterance.lang = targetLanguage.value;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    });
+
+    sourceText.addEventListener('keydown', event => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') translateButton.click();
+    });
+
+    initializeLanguages();
+  </script>
+</body>
+</html>
