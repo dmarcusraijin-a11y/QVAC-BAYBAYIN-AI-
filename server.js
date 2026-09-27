@@ -95,7 +95,14 @@ const server = createServer(async (request, response) => {
       }
 
       const modelId = await getLoadedModel(pair, descriptor);
-      const result = translate({ modelId, text: normalizedText, from, to, stream: false });
+      const result = translate({
+        modelId,
+        text: normalizedText,
+        from,
+        to,
+        modelType: 'nmtcpp-translation',
+        stream: false
+      });
       const translation = await result.text;
       json(response, 200, { translation, from, to });
     } catch (error) {

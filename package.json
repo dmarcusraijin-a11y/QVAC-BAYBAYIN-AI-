@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node bootstrap.js"
   },
   "dependencies": {
     "@qvac/sdk": "0.19.0"
